@@ -1,0 +1,66 @@
+# Environment Variables Template for Beer E-commerce Project
+# Copy this file to .env.local and fill in your actual values
+
+# =============================================================================
+# SUPABASE CONFIGURATION (REQUIRED)
+# =============================================================================
+# Get these from your Supabase project dashboard at https://supabase.com/dashboard
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url_here
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+
+# Optional: Supabase Service Role Key (for admin operations)
+# Only use this on the server side, never expose to client
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key_here
+
+# =============================================================================
+# APPLICATION CONFIGURATION
+# =============================================================================
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NODE_ENV=development
+
+# =============================================================================
+# ADMIN CONFIGURATION
+# =============================================================================
+# Set this for admin user creation during registration
+ADMIN_SECRET_CODE=your_admin_secret_code_here
+
+# =============================================================================
+# PAYMENT CONFIGURATION (ABA BANK)
+# =============================================================================
+# For production, replace with actual ABA Bank API credentials
+ABA_MERCHANT_ID=MINIMART_BEER_SHOP
+ABA_API_KEY=your_aba_api_key_here
+ABA_SECRET_KEY=your_aba_secret_key_here
+
+# =============================================================================
+# OPTIONAL: EMAIL CONFIGURATION
+# =============================================================================
+# Uncomment and configure if you plan to add email notifications
+# SMTP_HOST=smtp.gmail.com
+# SMTP_PORT=587
+# SMTP_USER=your_email@gmail.com
+# SMTP_PASS=your_app_password
+
+# =============================================================================
+# OPTIONAL: ANALYTICS
+# =============================================================================
+# Vercel Analytics is already included in package.json
+# NEXT_PUBLIC_VERCEL_ANALYTICS_ID=your_vercel_analytics_id
+
+# =============================================================================
+# OPTIONAL: OTHER SERVICES
+# =============================================================================
+# Uncomment if you plan to add these services later
+# STRIPE_PUBLISHABLE_KEY=pk_test_...
+# STRIPE_SECRET_KEY=sk_test_...
+# SENDGRID_API_KEY=your_sendgrid_api_key
+
+# =============================================================================
+# SETUP INSTRUCTIONS
+# =============================================================================
+# 1. Copy this file to .env.local
+# 2. Get your Supabase credentials from https://supabase.com/dashboard
+# 3. Set up your Supabase project and run the SQL scripts in /scripts/
+# 4. Configure your admin secret code
+# 5. For production, set up ABA Bank API credentials
+# 6. Optionally configure email and other services as needed
