@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import Link from "next/link"
-import { ShoppingCart, User, LogOut, Crown } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { useCartStore } from "@/lib/cart-store"
-import { useUser } from "@/lib/hooks/use-user"
-import { getSupabaseBrowserClient } from "@/lib/supabase/client"
+import Link from "next/link";
+import { ShoppingCart, User, LogOut, Crown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useCartStore } from "@/lib/cart-store";
+import { useUser } from "@/lib/hooks/use-user";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,44 +13,58 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Badge } from "@/components/ui/badge"
-import { useRouter } from "next/navigation"
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
+import { useRouter } from "next/navigation";
 
 export function Header() {
-  const router = useRouter()
-  const itemCount = useCartStore((state) => state.getItemCount())
-  const { user, isAuthenticated } = useUser()
+  const router = useRouter();
+  const itemCount = useCartStore((state) => state.getItemCount());
+  const { user, isAuthenticated } = useUser();
 
   const handleLogout = async () => {
-    const supabase = getSupabaseBrowserClient()
-    await supabase.auth.signOut()
-    router.push("/")
-    router.refresh()
-  }
+    const supabase = getSupabaseBrowserClient();
+    await supabase.auth.signOut();
+    router.push("/");
+    router.refresh();
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center justify-between">
+      <div className="flex h-16 items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-            <span className="text-xl font-bold text-primary-foreground">🍺</span>
+            <span className="text-xl font-bold text-primary-foreground">
+              🍺
+            </span>
           </div>
           <span className="text-xl font-bold">BeerMart</span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-6">
-          <Link href="/" className="text-sm font-medium hover:text-primary transition-colors">
+          <Link
+            href="/"
+            className="text-sm font-medium hover:text-primary transition-colors"
+          >
             Home
           </Link>
-          <Link href="/catalog" className="text-sm font-medium hover:text-primary transition-colors">
+          <Link
+            href="/catalog"
+            className="text-sm font-medium hover:text-primary transition-colors"
+          >
             Catalog
           </Link>
-          <Link href="/subscription" className="text-sm font-medium hover:text-primary transition-colors">
+          <Link
+            href="/subscription"
+            className="text-sm font-medium hover:text-primary transition-colors"
+          >
             Premium
           </Link>
           {user?.role === "admin" && (
-            <Link href="/admin" className="text-sm font-medium hover:text-primary transition-colors">
+            <Link
+              href="/admin"
+              className="text-sm font-medium hover:text-primary transition-colors"
+            >
               Admin
             </Link>
           )}
@@ -79,7 +93,9 @@ export function Header() {
                 <DropdownMenuLabel>
                   <div className="flex flex-col gap-1">
                     <p className="text-sm font-medium">{user.name}</p>
-                    <p className="text-xs text-muted-foreground">{user.email}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {user.email}
+                    </p>
                     {user.isPremium && (
                       <Badge variant="secondary" className="w-fit gap-1">
                         <Crown className="h-3 w-3" />
@@ -101,7 +117,10 @@ export function Header() {
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="text-destructive"
+                >
                   <LogOut className="mr-2 h-4 w-4" />
                   Logout
                 </DropdownMenuItem>
@@ -115,5 +134,5 @@ export function Header() {
         </div>
       </div>
     </header>
-  )
+  );
 }

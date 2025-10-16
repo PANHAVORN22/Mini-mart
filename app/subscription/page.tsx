@@ -1,15 +1,23 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { useAuthStore } from "@/lib/auth-store"
-import { Crown, Check, Star, Zap, Gift, Lock } from "lucide-react"
-import { toast } from "sonner"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useUser } from "@/lib/hooks/use-user";
+import { subscribe, cancelSubscription } from "@/lib/actions/subscriptions";
+import { Crown, Check, Star, Zap, Gift, Lock } from "lucide-react";
+import { toast } from "sonner";
 
 const premiumFeatures = [
   {
@@ -32,7 +40,7 @@ const premiumFeatures = [
     title: "Monthly Surprises",
     description: "Receive exclusive beer samples and merchandise",
   },
-]
+];
 
 const plans = [
   {
@@ -52,42 +60,67 @@ const plans = [
     popular: true,
     savings: "Save $20",
   },
-]
+];
 
 export default function SubscriptionPage() {
-  const router = useRouter()
-  const { user, isAuthenticated, togglePremium } = useAuthStore()
-  const [selectedPlan, setSelectedPlan] = useState<string>("yearly")
-  const [isProcessing, setIsProcessing] = useState(false)
+  const router = useRouter();
+  const { user, isAuthenticated } = useUser();
+  const [selectedPlan, setSelectedPlan] = useState<string>("yearly");
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleSubscribe = async () => {
-    if (!isAuthenticated) {
-      router.push("/login?redirect=/subscription")
-      return
+    if (!isAuthenticated || !user) {
+      router.push("/login?redirect=/subscription");
+      return;
     }
 
-    setIsProcessing(true)
+    setIsProcessing(true);
+    try {
+      const result = await subscribe(
+        user.id,
+        selectedPlan as "monthly" | "yearly"
+      );
+      if (!result.success) {
+        toast.error("Subscription failed", {
+          description: result.error || "Please try again",
+        });
+      } else {
+        toast.success("Welcome to Premium!", {
+          description: "Your premium membership is now active",
+        });
+        router.push("/dashboard");
+      }
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
-    // Simulate payment processing
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-
-    togglePremium()
-    toast.success("Welcome to Premium!", {
-      description: "Your premium membership is now active",
-    })
-
-    setIsProcessing(false)
-    router.push("/dashboard")
-  }
+  const handleCancel = async () => {
+    if (!isAuthenticated || !user) return;
+    setIsProcessing(true);
+    try {
+      const result = await cancelSubscription(user.id);
+      if (!result.success) {
+        toast.error("Cancel failed", {
+          description: result.error || "Please try again",
+        });
+      } else {
+        toast.success("Subscription cancelled");
+        router.refresh();
+      }
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   const handleManageSubscription = () => {
     toast.info("Subscription Management", {
       description: "This would open your subscription management portal",
-    })
-  }
+    });
+  };
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <>
       <Header />
 
       <main className="flex-1">
@@ -103,7 +136,8 @@ export default function SubscriptionPage() {
                 Unlock the Full Beer Experience
               </h1>
               <p className="text-lg text-muted-foreground text-pretty md:text-xl">
-                Get exclusive access to rare beers, special discounts, and premium perks with our membership program
+                Get exclusive access to rare beers, special discounts, and
+                premium perks with our membership program
               </p>
             </div>
           </div>
@@ -113,8 +147,12 @@ export default function SubscriptionPage() {
         <section className="py-16 md:py-24">
           <div className="container">
             <div className="mb-12 text-center">
-              <h2 className="mb-4 text-3xl font-bold tracking-tight md:text-4xl">Premium Benefits</h2>
-              <p className="text-muted-foreground">Everything you need for the ultimate craft beer experience</p>
+              <h2 className="mb-4 text-3xl font-bold tracking-tight md:text-4xl">
+                Premium Benefits
+              </h2>
+              <p className="text-muted-foreground">
+                Everything you need for the ultimate craft beer experience
+              </p>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -126,7 +164,9 @@ export default function SubscriptionPage() {
                     </div>
                     <div>
                       <h3 className="mb-2 font-semibold">{feature.title}</h3>
-                      <p className="text-sm text-muted-foreground">{feature.description}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {feature.description}
+                      </p>
                     </div>
                   </CardContent>
                 </Card>
@@ -139,8 +179,12 @@ export default function SubscriptionPage() {
         <section className="bg-muted/50 py-16 md:py-24">
           <div className="container">
             <div className="mb-12 text-center">
-              <h2 className="mb-4 text-3xl font-bold tracking-tight md:text-4xl">Choose Your Plan</h2>
-              <p className="text-muted-foreground">Select the plan that works best for you</p>
+              <h2 className="mb-4 text-3xl font-bold tracking-tight md:text-4xl">
+                Choose Your Plan
+              </h2>
+              <p className="text-muted-foreground">
+                Select the plan that works best for you
+              </p>
             </div>
 
             {user?.isPremium ? (
@@ -150,14 +194,30 @@ export default function SubscriptionPage() {
                     <Crown className="h-8 w-8 text-primary" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold">You're a Premium Member!</h3>
+                    <h3 className="text-xl font-semibold">
+                      You're a Premium Member!
+                    </h3>
                     <p className="mt-2 text-sm text-muted-foreground">
-                      Enjoy all the exclusive benefits of your premium membership
+                      Enjoy all the exclusive benefits of your premium
+                      membership
                     </p>
                   </div>
-                  <Button onClick={handleManageSubscription} variant="outline" className="bg-transparent">
-                    Manage Subscription
-                  </Button>
+                  <div className="flex gap-3">
+                    <Button
+                      onClick={handleManageSubscription}
+                      variant="outline"
+                      className="bg-transparent"
+                    >
+                      Manage Subscription
+                    </Button>
+                    <Button
+                      onClick={handleCancel}
+                      variant="destructive"
+                      disabled={isProcessing}
+                    >
+                      {isProcessing ? "Cancelling..." : "Cancel"}
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             ) : (
@@ -165,7 +225,9 @@ export default function SubscriptionPage() {
                 {plans.map((plan) => (
                   <Card
                     key={plan.id}
-                    className={`relative ${selectedPlan === plan.id ? "border-primary shadow-lg" : ""}`}
+                    className={`relative ${
+                      selectedPlan === plan.id ? "border-primary shadow-lg" : ""
+                    }`}
                   >
                     {plan.popular && (
                       <div className="absolute -top-3 left-1/2 -translate-x-1/2">
@@ -176,8 +238,12 @@ export default function SubscriptionPage() {
                       <CardTitle>{plan.name}</CardTitle>
                       <CardDescription>{plan.description}</CardDescription>
                       <div className="mt-4">
-                        <span className="text-4xl font-bold">${plan.price}</span>
-                        <span className="text-muted-foreground">/{plan.period}</span>
+                        <span className="text-4xl font-bold">
+                          ${plan.price}
+                        </span>
+                        <span className="text-muted-foreground">
+                          /{plan.period}
+                        </span>
                       </div>
                       {plan.savings && (
                         <Badge variant="secondary" className="mt-2 w-fit">
@@ -189,30 +255,42 @@ export default function SubscriptionPage() {
                       <ul className="space-y-3">
                         <li className="flex items-start gap-2">
                           <Check className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                          <span className="text-sm">Access to exclusive premium beers</span>
+                          <span className="text-sm">
+                            Access to exclusive premium beers
+                          </span>
                         </li>
                         <li className="flex items-start gap-2">
                           <Check className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                          <span className="text-sm">15% discount on all purchases</span>
+                          <span className="text-sm">
+                            15% discount on all purchases
+                          </span>
                         </li>
                         <li className="flex items-start gap-2">
                           <Check className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                          <span className="text-sm">Priority delivery service</span>
+                          <span className="text-sm">
+                            Priority delivery service
+                          </span>
                         </li>
                         <li className="flex items-start gap-2">
                           <Check className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                          <span className="text-sm">Monthly exclusive samples</span>
+                          <span className="text-sm">
+                            Monthly exclusive samples
+                          </span>
                         </li>
                         <li className="flex items-start gap-2">
                           <Check className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                          <span className="text-sm">Early access to new releases</span>
+                          <span className="text-sm">
+                            Early access to new releases
+                          </span>
                         </li>
                       </ul>
                     </CardContent>
                     <CardFooter>
                       <Button
                         className="w-full"
-                        variant={selectedPlan === plan.id ? "default" : "outline"}
+                        variant={
+                          selectedPlan === plan.id ? "default" : "outline"
+                        }
                         onClick={() => setSelectedPlan(plan.id)}
                       >
                         {selectedPlan === plan.id ? "Selected" : "Select Plan"}
@@ -225,10 +303,16 @@ export default function SubscriptionPage() {
 
             {!user?.isPremium && (
               <div className="mt-8 text-center">
-                <Button size="lg" onClick={handleSubscribe} disabled={isProcessing}>
+                <Button
+                  size="lg"
+                  onClick={handleSubscribe}
+                  disabled={isProcessing}
+                >
                   {isProcessing ? "Processing..." : "Subscribe Now"}
                 </Button>
-                <p className="mt-4 text-sm text-muted-foreground">Cancel anytime. No long-term commitment.</p>
+                <p className="mt-4 text-sm text-muted-foreground">
+                  Cancel anytime. No long-term commitment.
+                </p>
               </div>
             )}
           </div>
@@ -238,8 +322,12 @@ export default function SubscriptionPage() {
         <section className="py-16 md:py-24">
           <div className="container">
             <div className="mb-12 text-center">
-              <h2 className="mb-4 text-3xl font-bold tracking-tight md:text-4xl">Exclusive Premium Beers</h2>
-              <p className="text-muted-foreground">A taste of what awaits premium members</p>
+              <h2 className="mb-4 text-3xl font-bold tracking-tight md:text-4xl">
+                Exclusive Premium Beers
+              </h2>
+              <p className="text-muted-foreground">
+                A taste of what awaits premium members
+              </p>
             </div>
 
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -278,7 +366,9 @@ export default function SubscriptionPage() {
                   </div>
                   <CardContent className="p-4">
                     <h3 className="font-semibold">{beer.name}</h3>
-                    <p className="text-sm text-muted-foreground">{beer.brand}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {beer.brand}
+                    </p>
                   </CardContent>
                 </Card>
               ))}
@@ -291,53 +381,67 @@ export default function SubscriptionPage() {
           <div className="container">
             <div className="mx-auto max-w-3xl">
               <div className="mb-12 text-center">
-                <h2 className="mb-4 text-3xl font-bold tracking-tight md:text-4xl">Frequently Asked Questions</h2>
+                <h2 className="mb-4 text-3xl font-bold tracking-tight md:text-4xl">
+                  Frequently Asked Questions
+                </h2>
               </div>
 
               <div className="space-y-4">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">Can I cancel anytime?</CardTitle>
+                    <CardTitle className="text-lg">
+                      Can I cancel anytime?
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-muted-foreground">
-                      Yes, you can cancel your premium membership at any time. Your benefits will continue until the end
-                      of your billing period.
+                      Yes, you can cancel your premium membership at any time.
+                      Your benefits will continue until the end of your billing
+                      period.
                     </p>
                   </CardContent>
                 </Card>
 
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">What payment methods do you accept?</CardTitle>
+                    <CardTitle className="text-lg">
+                      What payment methods do you accept?
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-muted-foreground">
-                      We accept all major credit cards, debit cards, and digital payment methods for your convenience.
+                      We accept all major credit cards, debit cards, and digital
+                      payment methods for your convenience.
                     </p>
                   </CardContent>
                 </Card>
 
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">How does the discount work?</CardTitle>
+                    <CardTitle className="text-lg">
+                      How does the discount work?
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-muted-foreground">
-                      Premium members automatically receive 15% off all purchases at checkout. The discount is applied
-                      to your cart total before taxes and shipping.
+                      Premium members automatically receive 15% off all
+                      purchases at checkout. The discount is applied to your
+                      cart total before taxes and shipping.
                     </p>
                   </CardContent>
                 </Card>
 
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-lg">When will I receive my monthly samples?</CardTitle>
+                    <CardTitle className="text-lg">
+                      When will I receive my monthly samples?
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <p className="text-muted-foreground">
-                      Monthly samples are shipped on the first week of each month. You'll receive a notification when
-                      your package is on its way.
+                      Monthly samples are shipped on the first week of each
+                      month. You'll receive a notification when your package is
+                      on its way.
                     </p>
                   </CardContent>
                 </Card>
@@ -348,6 +452,6 @@ export default function SubscriptionPage() {
       </main>
 
       <Footer />
-    </div>
-  )
+    </>
+  );
 }

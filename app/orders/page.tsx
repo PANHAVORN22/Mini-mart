@@ -1,85 +1,89 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { useUser } from "@/lib/hooks/use-user"
-import { getUserOrders } from "@/lib/actions/orders"
-import { Package, Calendar, DollarSign } from "lucide-react"
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useUser } from "@/lib/hooks/use-user";
+import { getUserOrders } from "@/lib/actions/orders";
+import { Package, Calendar, DollarSign } from "lucide-react";
 
 interface Order {
-  id: string
-  status: string
-  total: number
-  createdAt: string
+  id: string;
+  status: string;
+  total: number;
+  createdAt: string;
   items: Array<{
-    id: string
-    quantity: number
-    price: number
+    id: string;
+    quantity: number;
+    price: number;
     beer: {
-      id: string
-      name: string
-      type: string
-      price: number
-      imageUrl: string
-    }
-  }>
+      id: string;
+      name: string;
+      type: string;
+      price: number;
+      imageUrl: string;
+    };
+  }>;
 }
 
 export default function OrdersPage() {
-  const router = useRouter()
-  const { user, isAuthenticated, isLoading } = useUser()
-  const [orders, setOrders] = useState<Order[]>([])
-  const [isLoadingOrders, setIsLoadingOrders] = useState(true)
+  const router = useRouter();
+  const { user, isAuthenticated, isLoading } = useUser();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [isLoadingOrders, setIsLoadingOrders] = useState(true);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.push("/login?redirect=/orders")
+      router.push("/login?redirect=/orders");
     }
-  }, [isLoading, isAuthenticated, router])
+  }, [isLoading, isAuthenticated, router]);
 
   useEffect(() => {
     const fetchOrders = async () => {
       if (user) {
-        const userOrders = await getUserOrders(user.id)
-        setOrders(userOrders)
-        setIsLoadingOrders(false)
+        const userOrders = await getUserOrders(user.id);
+        setOrders(userOrders);
+        setIsLoadingOrders(false);
       }
-    }
+    };
 
     if (user) {
-      fetchOrders()
+      fetchOrders();
     }
-  }, [user])
+  }, [user]);
 
   if (isLoading || isLoadingOrders) {
     return (
-      <div className="flex min-h-screen flex-col">
+      <>
         <Header />
         <main className="flex-1 flex items-center justify-center">
           <p className="text-muted-foreground">Loading orders...</p>
         </main>
         <Footer />
-      </div>
-    )
+      </>
+    );
   }
 
   if (!isAuthenticated) {
-    return null
+    return null;
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <>
       <Header />
 
       <main className="flex-1">
         <div className="border-b bg-muted/50 py-8">
           <div className="container">
-            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">My Orders</h1>
-            <p className="mt-2 text-muted-foreground">View and track your order history</p>
+            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
+              My Orders
+            </h1>
+            <p className="mt-2 text-muted-foreground">
+              View and track your order history
+            </p>
           </div>
         </div>
 
@@ -92,7 +96,9 @@ export default function OrdersPage() {
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold">No orders yet</h2>
-                  <p className="mt-2 text-sm text-muted-foreground">Start shopping to see your orders here</p>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Start shopping to see your orders here
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -103,14 +109,17 @@ export default function OrdersPage() {
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div>
-                        <CardTitle className="text-lg">Order #{order.id.slice(0, 8)}</CardTitle>
+                        <CardTitle className="text-lg">
+                          Order #{order.id.slice(0, 8)}
+                        </CardTitle>
                         <div className="mt-2 flex items-center gap-4 text-sm text-muted-foreground">
                           <div className="flex items-center gap-1">
                             <Calendar className="h-4 w-4" />
                             {new Date(order.createdAt).toLocaleDateString()}
                           </div>
                           <div className="flex items-center gap-1">
-                            <DollarSign className="h-4 w-4" />${order.total.toFixed(2)}
+                            <DollarSign className="h-4 w-4" />$
+                            {order.total.toFixed(2)}
                           </div>
                         </div>
                       </div>
@@ -119,8 +128,8 @@ export default function OrdersPage() {
                           order.status === "delivered"
                             ? "default"
                             : order.status === "pending"
-                              ? "secondary"
-                              : "outline"
+                            ? "secondary"
+                            : "outline"
                         }
                       >
                         {order.status}
@@ -141,10 +150,13 @@ export default function OrdersPage() {
                           <div className="flex-1">
                             <p className="font-medium">{item.beer.name}</p>
                             <p className="text-sm text-muted-foreground">
-                              Quantity: {item.quantity} • ${item.beer.price.toFixed(2)} each
+                              Quantity: {item.quantity} • $
+                              {item.beer.price.toFixed(2)} each
                             </p>
                           </div>
-                          <p className="font-semibold">${(item.beer.price * item.quantity).toFixed(2)}</p>
+                          <p className="font-semibold">
+                            ${(item.beer.price * item.quantity).toFixed(2)}
+                          </p>
                         </div>
                       ))}
                     </div>
@@ -157,6 +169,6 @@ export default function OrdersPage() {
       </main>
 
       <Footer />
-    </div>
-  )
+    </>
+  );
 }

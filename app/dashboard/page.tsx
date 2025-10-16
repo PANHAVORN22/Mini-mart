@@ -1,77 +1,81 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { useUser } from "@/lib/hooks/use-user"
-import { getUserOrders } from "@/lib/actions/orders"
-import { Package, ShoppingBag, Crown, User } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useUser } from "@/lib/hooks/use-user";
+import { getUserOrders } from "@/lib/actions/orders";
+import { Package, ShoppingBag, Crown, User } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface Order {
-  id: string
-  status: string
-  total: number
-  createdAt: string
+  id: string;
+  status: string;
+  total: number;
+  createdAt: string;
 }
 
 export default function DashboardPage() {
-  const router = useRouter()
-  const { user, isAuthenticated, isLoading } = useUser()
-  const [orders, setOrders] = useState<Order[]>([])
-  const [isLoadingOrders, setIsLoadingOrders] = useState(true)
+  const router = useRouter();
+  const { user, isAuthenticated, isLoading } = useUser();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [isLoadingOrders, setIsLoadingOrders] = useState(true);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.push("/login?redirect=/dashboard")
+      router.push("/login?redirect=/dashboard");
     }
-  }, [isLoading, isAuthenticated, router])
+  }, [isLoading, isAuthenticated, router]);
 
   useEffect(() => {
     const fetchOrders = async () => {
       if (user) {
-        const userOrders = await getUserOrders(user.id)
-        setOrders(userOrders)
-        setIsLoadingOrders(false)
+        const userOrders = await getUserOrders(user.id);
+        setOrders(userOrders);
+        setIsLoadingOrders(false);
       }
-    }
+    };
 
     if (user) {
-      fetchOrders()
+      fetchOrders();
     }
-  }, [user])
+  }, [user]);
 
   if (isLoading || isLoadingOrders) {
     return (
-      <div className="flex min-h-screen flex-col">
+      <>
         <Header />
         <main className="flex-1 flex items-center justify-center">
           <p className="text-muted-foreground">Loading dashboard...</p>
         </main>
         <Footer />
-      </div>
-    )
+      </>
+    );
   }
 
   if (!isAuthenticated) {
-    return null
+    return null;
   }
 
-  const totalSpent = orders.reduce((sum, order) => sum + order.total, 0)
+  const totalSpent = orders.reduce((sum, order) => sum + order.total, 0);
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <>
       <Header />
 
       <main className="flex-1">
         <div className="border-b bg-muted/50 py-8">
           <div className="container">
-            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Dashboard</h1>
-            <p className="mt-2 text-muted-foreground">Welcome back, {user?.name}</p>
+            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
+              Dashboard
+            </h1>
+            <p className="mt-2 text-muted-foreground">
+              Welcome back, {user?.name}
+            </p>
           </div>
         </div>
 
@@ -79,7 +83,9 @@ export default function DashboardPage() {
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Total Orders
+                </CardTitle>
                 <Package className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -90,33 +96,47 @@ export default function DashboardPage() {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Total Spent</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Total Spent
+                </CardTitle>
                 <ShoppingBag className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">${totalSpent.toFixed(2)}</div>
-                <p className="text-xs text-muted-foreground">All time spending</p>
+                <div className="text-2xl font-bold">
+                  ${totalSpent.toFixed(2)}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  All time spending
+                </p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Membership</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Membership
+                </CardTitle>
                 <Crown className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">{user?.isPremium ? "Premium" : "Standard"}</div>
+                <div className="text-2xl font-bold">
+                  {user?.isPremium ? "Premium" : "Standard"}
+                </div>
                 <p className="text-xs text-muted-foreground">Current plan</p>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Account Type</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  Account Type
+                </CardTitle>
                 <User className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold capitalize">{user?.role}</div>
+                <div className="text-2xl font-bold capitalize">
+                  {user?.role}
+                </div>
                 <p className="text-xs text-muted-foreground">User role</p>
               </CardContent>
             </Card>
@@ -138,7 +158,9 @@ export default function DashboardPage() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Member Since</p>
-                  <p className="font-medium">{new Date(user?.createdAt || "").toLocaleDateString()}</p>
+                  <p className="font-medium">
+                    {new Date(user?.createdAt || "").toLocaleDateString()}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Status</p>
@@ -196,22 +218,29 @@ export default function DashboardPage() {
               <CardContent>
                 <div className="space-y-4">
                   {orders.slice(0, 3).map((order) => (
-                    <div key={order.id} className="flex items-center justify-between border-b pb-4 last:border-0">
+                    <div
+                      key={order.id}
+                      className="flex items-center justify-between border-b pb-4 last:border-0"
+                    >
                       <div>
-                        <p className="font-medium">Order #{order.id.slice(0, 8)}</p>
+                        <p className="font-medium">
+                          Order #{order.id.slice(0, 8)}
+                        </p>
                         <p className="text-sm text-muted-foreground">
                           {new Date(order.createdAt).toLocaleDateString()}
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-semibold">${order.total.toFixed(2)}</p>
+                        <p className="font-semibold">
+                          ${order.total.toFixed(2)}
+                        </p>
                         <Badge
                           variant={
                             order.status === "delivered"
                               ? "default"
                               : order.status === "pending"
-                                ? "secondary"
-                                : "outline"
+                              ? "secondary"
+                              : "outline"
                           }
                           className="mt-1"
                         >
@@ -233,6 +262,6 @@ export default function DashboardPage() {
       </main>
 
       <Footer />
-    </div>
-  )
+    </>
+  );
 }

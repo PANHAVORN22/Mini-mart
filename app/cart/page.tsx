@@ -1,22 +1,29 @@
-"use client"
+"use client";
 
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { useCartStore } from "@/lib/cart-store"
-import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react"
-import Link from "next/link"
-import { useAuthStore } from "@/lib/auth-store"
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { useCartStore } from "@/lib/cart-store";
+import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
+import Link from "next/link";
+import { useAuthStore } from "@/lib/auth-store";
 
 export default function CartPage() {
-  const { items, removeItem, updateQuantity, getTotal, clearCart } = useCartStore()
-  const { isAuthenticated } = useAuthStore()
-  const total = getTotal()
+  const { items, removeItem, updateQuantity, getTotal, clearCart } =
+    useCartStore();
+  const { isAuthenticated } = useAuthStore();
+  const total = getTotal();
 
   if (items.length === 0) {
     return (
-      <div className="flex min-h-screen flex-col">
+      <>
         <Header />
         <main className="flex-1">
           <div className="container py-16">
@@ -27,7 +34,9 @@ export default function CartPage() {
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold">Your cart is empty</h2>
-                  <p className="mt-2 text-sm text-muted-foreground">Add some beers to get started</p>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Add some beers to get started
+                  </p>
                 </div>
                 <Link href="/catalog">
                   <Button>Browse Catalog</Button>
@@ -37,19 +46,23 @@ export default function CartPage() {
           </div>
         </main>
         <Footer />
-      </div>
-    )
+      </>
+    );
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <>
       <Header />
 
       <main className="flex-1">
         <div className="border-b bg-muted/50 py-8">
           <div className="container">
-            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">Shopping Cart</h1>
-            <p className="mt-2 text-muted-foreground">{items.length} items in your cart</p>
+            <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
+              Shopping Cart
+            </h1>
+            <p className="mt-2 text-muted-foreground">
+              {items.length} items in your cart
+            </p>
           </div>
         </div>
 
@@ -71,7 +84,9 @@ export default function CartPage() {
                       <div className="flex flex-1 flex-col justify-between">
                         <div>
                           <h3 className="font-semibold">{item.beer.name}</h3>
-                          <p className="text-sm text-muted-foreground">{item.beer.brand}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {item.beer.brand}
+                          </p>
                           <p className="mt-1 text-sm">
                             {item.beer.type} • {item.beer.abv}% ABV
                           </p>
@@ -83,16 +98,25 @@ export default function CartPage() {
                               size="icon"
                               variant="outline"
                               className="h-8 w-8 bg-transparent"
-                              onClick={() => updateQuantity(item.beer.id, Math.max(1, item.quantity - 1))}
+                              onClick={() =>
+                                updateQuantity(
+                                  item.beer.id,
+                                  Math.max(1, item.quantity - 1)
+                                )
+                              }
                             >
                               <Minus className="h-4 w-4" />
                             </Button>
-                            <span className="w-8 text-center font-medium">{item.quantity}</span>
+                            <span className="w-8 text-center font-medium">
+                              {item.quantity}
+                            </span>
                             <Button
                               size="icon"
                               variant="outline"
                               className="h-8 w-8 bg-transparent"
-                              onClick={() => updateQuantity(item.beer.id, item.quantity + 1)}
+                              onClick={() =>
+                                updateQuantity(item.beer.id, item.quantity + 1)
+                              }
                               disabled={item.quantity >= item.beer.stock}
                             >
                               <Plus className="h-4 w-4" />
@@ -100,7 +124,9 @@ export default function CartPage() {
                           </div>
 
                           <div className="flex items-center gap-4">
-                            <span className="text-lg font-bold">${(item.beer.price * item.quantity).toFixed(2)}</span>
+                            <span className="text-lg font-bold">
+                              ${(item.beer.price * item.quantity).toFixed(2)}
+                            </span>
                             <Button
                               size="icon"
                               variant="ghost"
@@ -117,7 +143,11 @@ export default function CartPage() {
                 </Card>
               ))}
 
-              <Button variant="outline" onClick={clearCart} className="w-full bg-transparent">
+              <Button
+                variant="outline"
+                onClick={clearCart}
+                className="w-full bg-transparent"
+              >
                 Clear Cart
               </Button>
             </div>
@@ -146,7 +176,14 @@ export default function CartPage() {
                   <div className="border-t pt-4">
                     <div className="flex justify-between text-lg font-bold">
                       <span>Total</span>
-                      <span>${(total + (total > 50 ? 0 : 5.99) + total * 0.1).toFixed(2)}</span>
+                      <span>
+                        $
+                        {(
+                          total +
+                          (total > 50 ? 0 : 5.99) +
+                          total * 0.1
+                        ).toFixed(2)}
+                      </span>
                     </div>
                   </div>
 
@@ -183,6 +220,6 @@ export default function CartPage() {
       </main>
 
       <Footer />
-    </div>
-  )
+    </>
+  );
 }

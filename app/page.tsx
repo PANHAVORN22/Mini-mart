@@ -1,17 +1,17 @@
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { ArrowRight, Star, Truck, Shield, Crown } from "lucide-react"
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
-import { getFeaturedBeers } from "@/lib/actions/beers"
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ArrowRight, Star, Truck, Shield, Crown } from "lucide-react";
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
+import { getFeaturedBeers } from "@/lib/actions/beers";
 
 export default async function HomePage() {
-  const featuredBeers = await getFeaturedBeers(4)
+  const featuredBeers = await getFeaturedBeers(4);
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <>
       <Header />
 
       <main className="flex-1">
@@ -26,8 +26,9 @@ export default async function HomePage() {
                 Discover Your Perfect Beer
               </h1>
               <p className="mb-8 text-lg text-muted-foreground text-pretty md:text-xl">
-                Explore our curated collection of craft beers from local and international breweries. Quality,
-                freshness, and variety delivered to your door.
+                Explore our curated collection of craft beers from local and
+                international breweries. Quality, freshness, and variety
+                delivered to your door.
               </p>
               <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
                 <Link href="/catalog">
@@ -37,7 +38,11 @@ export default async function HomePage() {
                   </Button>
                 </Link>
                 <Link href="/subscription">
-                  <Button size="lg" variant="outline" className="w-full sm:w-auto bg-transparent">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="w-full sm:w-auto bg-transparent"
+                  >
                     <Crown className="mr-2 h-4 w-4" />
                     Go Premium
                   </Button>
@@ -58,7 +63,8 @@ export default async function HomePage() {
                   </div>
                   <h3 className="text-xl font-semibold">Premium Selection</h3>
                   <p className="text-sm text-muted-foreground">
-                    Handpicked craft beers from award-winning breweries around the world
+                    Handpicked craft beers from award-winning breweries around
+                    the world
                   </p>
                 </CardContent>
               </Card>
@@ -70,7 +76,8 @@ export default async function HomePage() {
                   </div>
                   <h3 className="text-xl font-semibold">Fast Delivery</h3>
                   <p className="text-sm text-muted-foreground">
-                    Quick and reliable delivery to ensure your beer arrives fresh and cold
+                    Quick and reliable delivery to ensure your beer arrives
+                    fresh and cold
                   </p>
                 </CardContent>
               </Card>
@@ -82,7 +89,8 @@ export default async function HomePage() {
                   </div>
                   <h3 className="text-xl font-semibold">Quality Guaranteed</h3>
                   <p className="text-sm text-muted-foreground">
-                    Every beer is carefully stored and handled to maintain perfect quality
+                    Every beer is carefully stored and handled to maintain
+                    perfect quality
                   </p>
                 </CardContent>
               </Card>
@@ -94,8 +102,12 @@ export default async function HomePage() {
         <section className="bg-muted/50 py-16 md:py-24">
           <div className="container">
             <div className="mb-12 text-center">
-              <h2 className="mb-4 text-3xl font-bold tracking-tight md:text-4xl">Featured Beers</h2>
-              <p className="text-muted-foreground">Discover our most popular craft beers</p>
+              <h2 className="mb-4 text-3xl font-bold tracking-tight md:text-4xl">
+                Featured Beers
+              </h2>
+              <p className="text-muted-foreground">
+                Discover our most popular craft beers
+              </p>
             </div>
 
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -111,8 +123,12 @@ export default async function HomePage() {
                   <CardContent className="p-4">
                     <div className="mb-2 flex items-start justify-between gap-2">
                       <div>
-                        <h3 className="font-semibold text-balance">{beer.name}</h3>
-                        <p className="text-sm text-muted-foreground">{beer.brand}</p>
+                        <h3 className="font-semibold text-balance">
+                          {beer.name}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {beer.brand}
+                        </p>
                       </div>
                       {beer.isPremiumOnly && (
                         <Badge variant="secondary" className="shrink-0">
@@ -126,7 +142,9 @@ export default async function HomePage() {
                       <span className="font-medium">{beer.abv}% ABV</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-lg font-bold">${beer.price.toFixed(2)}</span>
+                      <span className="text-lg font-bold">
+                        ${beer.price.toFixed(2)}
+                      </span>
                       <Link href={`/catalog?id=${beer.id}`}>
                         <Button size="sm">View Details</Button>
                       </Link>
@@ -154,10 +172,12 @@ export default async function HomePage() {
               <CardContent className="p-8 md:p-12">
                 <div className="mx-auto max-w-2xl text-center">
                   <Crown className="mx-auto mb-4 h-12 w-12" />
-                  <h2 className="mb-4 text-3xl font-bold tracking-tight md:text-4xl">Unlock Premium Access</h2>
+                  <h2 className="mb-4 text-3xl font-bold tracking-tight md:text-4xl">
+                    Unlock Premium Access
+                  </h2>
                   <p className="mb-8 text-lg opacity-90">
-                    Get exclusive access to rare beers, special discounts, and priority delivery with our premium
-                    membership
+                    Get exclusive access to rare beers, special discounts, and
+                    priority delivery with our premium membership
                   </p>
                   <Link href="/subscription">
                     <Button size="lg" variant="secondary">
@@ -172,6 +192,6 @@ export default async function HomePage() {
       </main>
 
       <Footer />
-    </div>
-  )
+    </>
+  );
 }

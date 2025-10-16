@@ -1,21 +1,21 @@
-"use client"
+"use client";
 
-import { useSearchParams } from "next/navigation"
-import Link from "next/link"
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { CheckCircle2, QrCode } from "lucide-react"
-import { ABABankQRCode } from "@/components/aba-bank-qr"
+import { useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CheckCircle2, QrCode } from "lucide-react";
+import { ABABankQRCode } from "@/components/aba-bank-qr";
 
 export default function OrderConfirmationPage() {
-  const searchParams = useSearchParams()
-  const orderId = searchParams.get("orderId") || "N/A"
-  const amount = searchParams.get("amount") || "0.00"
+  const searchParams = useSearchParams();
+  const orderId = searchParams.get("orderId") || "N/A";
+  const amount = searchParams.get("amount") || "0.00";
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <>
       <Header />
 
       <main className="flex-1 flex items-center justify-center py-16">
@@ -30,7 +30,9 @@ export default function OrderConfirmationPage() {
 
                 <div className="space-y-2">
                   <h1 className="text-2xl font-bold">Order Confirmed!</h1>
-                  <p className="text-muted-foreground">Thank you for your purchase</p>
+                  <p className="text-muted-foreground">
+                    Thank you for your purchase
+                  </p>
                 </div>
 
                 <div className="w-full rounded-lg bg-muted p-4">
@@ -82,8 +84,8 @@ export default function OrderConfirmationPage() {
                 </div>
                 <div className="w-full rounded-lg bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 p-3">
                   <p className="text-xs text-amber-800 dark:text-amber-200">
-                    <strong>Note:</strong> Your order will be processed once payment is confirmed. This usually takes
-                    1-2 minutes.
+                    <strong>Note:</strong> Your order will be processed once
+                    payment is confirmed. This usually takes 1-2 minutes.
                   </p>
                 </div>
               </CardContent>
@@ -93,6 +95,6 @@ export default function OrderConfirmationPage() {
       </main>
 
       <Footer />
-    </div>
-  )
+    </>
+  );
 }
