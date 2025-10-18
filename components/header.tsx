@@ -35,10 +35,10 @@ export function Header() {
         <Link href="/" className="flex items-center gap-2">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
             <span className="text-xl font-bold text-primary-foreground">
-              🍺
+            🛒
             </span>
           </div>
-          <span className="text-xl font-bold">BeerMart</span>
+          <span className="text-xl font-bold">E-cornor</span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-6">

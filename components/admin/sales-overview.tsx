@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Calendar, DollarSign } from "lucide-react"
 import { getAllOrders } from "@/lib/actions/admin"
+import { AdminNotifications } from "@/components/admin/notifications"
 
 interface Order {
   id: string
@@ -61,6 +62,7 @@ export function SalesOverview() {
 
   return (
     <div className="space-y-6">
+      <AdminNotifications />
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">

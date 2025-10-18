@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { getSupabaseServiceRoleClient } from "@/lib/supabase/service";
 
 export async function getAllOrders() {
   const supabase = await getSupabaseServerClient();
@@ -106,6 +107,80 @@ export async function toggleUserPremium(userId: string, isPremium: boolean) {
 
   revalidatePath("/admin");
   return { success: true };
+}
+
+export async function setUserRole(userId: string, role: "customer" | "admin") {
+  // Ensure the caller is authenticated and is an admin
+  const supabase = await getSupabaseServerClient();
+
+  const {
+    data: { user: caller },
+  } = await supabase.auth.getUser();
+
+  if (!caller) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  // Check caller's role in users table
+  const { data: callerProfile, error: profileError } = await supabase
+    .from("users")
+    .select("role")
+    .eq("id", caller.id)
+    .maybeSingle();
+
+  if (profileError) {
+    console.error("Error fetching caller profile:", profileError);
+    return { success: false, error: "Failed to verify caller" };
+  }
+
+  if (!callerProfile || callerProfile.role !== "admin") {
+    return { success: false, error: "Forbidden: admin only" };
+  }
+
+  // Use service role client to perform the sensitive role update
+  try {
+    const service = getSupabaseServiceRoleClient();
+    // Read the target user's current role so we can audit the change
+    const { data: targetUser } = await service
+      .from("users")
+      .select("role")
+      .eq("id", userId)
+      .maybeSingle();
+    const oldRole = targetUser?.role || "customer";
+
+    const { error } = await service
+      .from("users")
+      .update({ role })
+      .eq("id", userId);
+
+    if (error) {
+      console.error("Error setting user role with service client:", error);
+      return { success: false, error: error.message };
+    }
+
+    // Insert audit record
+    try {
+      const { error: auditError } = await service.from("role_changes").insert({
+        admin_id: caller.id,
+        target_user_id: userId,
+        old_role: oldRole,
+        new_role: role,
+      });
+
+      if (auditError) {
+        console.error("Failed to write role change audit:", auditError);
+        // don't fail the operation for audit failures, just log
+      }
+    } catch (auditErr) {
+      console.error("Exception writing role change audit:", auditErr);
+    }
+
+    revalidatePath("/admin");
+    return { success: true };
+  } catch (err: any) {
+    console.error("Service role update failed:", err);
+    return { success: false, error: err?.message || "Unknown error" };
+  }
 }
 
 export async function createBeer(beerData: {
@@ -213,4 +288,59 @@ export async function getAdminStats() {
     orderCount,
     userCount: userCount || 0,
   };
+}
+
+export async function getRoleChanges(limit = 50) {
+  const supabase = await getSupabaseServerClient();
+
+  const { data, error } = await supabase
+    .from("role_changes")
+    .select(
+      "*, admins:users!admin_id(full_name,email), target:users!target_user_id(full_name,email)"
+    )
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.error("Error fetching role changes:", error);
+    return [];
+  }
+
+  return (data || []).map((r: any) => ({
+    id: r.id,
+    adminId: r.admin_id,
+    adminName: r?.admins?.full_name || r?.admins?.email || "Unknown",
+    targetUserId: r.target_user_id,
+    targetName: r?.target?.full_name || r?.target?.email || "Unknown",
+    oldRole: r.old_role,
+    newRole: r.new_role,
+    createdAt: r.created_at,
+  }));
+}
+
+export async function getNotifications(limit = 50) {
+  const supabase = await getSupabaseServerClient();
+
+  const { data, error } = await supabase
+    .from("notifications")
+    .select("*, users(*)")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.error("Error fetching notifications:", error);
+    return [];
+  }
+
+  return (data || []).map((n: any) => ({
+    id: n.id,
+    userId: n.user_id,
+    orderId: n.order_id,
+    type: n.type,
+    message: n.message,
+    metadata: n.metadata,
+    read: n.read,
+    createdAt: n.created_at,
+    userName: n.users?.full_name || n.users?.email || "Unknown",
+  }));
 }

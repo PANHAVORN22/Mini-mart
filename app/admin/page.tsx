@@ -1,16 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUser } from "@/lib/hooks/use-user";
 import { StockManagement } from "@/components/admin/stock-management";
 import { ProductManagement } from "@/components/admin/product-management";
 import { SalesOverview } from "@/components/admin/sales-overview";
 import { UserManagement } from "@/components/admin/user-management";
+import { RoleChanges } from "@/components/admin/role-changes";
 import { Package, TrendingUp, Users, DollarSign } from "lucide-react";
 import { getAdminStats } from "@/lib/actions/admin";
 
@@ -26,9 +29,8 @@ export default function AdminPage() {
   const [isLoadingStats, setIsLoadingStats] = useState(true);
 
   useEffect(() => {
-    if (!isLoading && (!isAuthenticated || user?.role !== "admin")) {
-      router.push("/");
-    }
+    // Don't automatically redirect users away from /admin.
+    // Instead we'll show a friendly message below if they aren't allowed.
   }, [isLoading, isAuthenticated, user, router]);
 
   useEffect(() => {
@@ -55,8 +57,59 @@ export default function AdminPage() {
     );
   }
 
-  if (!isAuthenticated || user?.role !== "admin") {
-    return null;
+  // If the app is still loading user state, show the loader above.
+  // If not authenticated, show a prompt to login so the link actually lands on /admin.
+  if (!isLoading && !isAuthenticated) {
+    return (
+      <>
+        <Header />
+        <main className="flex-1">
+          <div className="container py-8">
+            <Card>
+              <CardHeader>
+                <CardTitle>Admin Area</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="mb-4">
+                  You need to be signed in as an admin to access this page.
+                </p>
+                <Link href="/login">
+                  <Button>Go to Login</Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  // If authenticated but not an admin, show an access denied message rather than redirecting.
+  if (!isLoading && isAuthenticated && user?.role !== "admin") {
+    return (
+      <>
+        <Header />
+        <main className="flex-1">
+          <div className="container py-8">
+            <Card>
+              <CardHeader>
+                <CardTitle>Access Denied</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="mb-4">
+                  You do not have permission to view the admin dashboard.
+                </p>
+                <Link href="/dashboard">
+                  <Button>Back to Dashboard</Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
   }
 
   return (
@@ -143,11 +196,12 @@ export default function AdminPage() {
 
           {/* Management Tabs */}
           <Tabs defaultValue="products" className="space-y-6">
-            <TabsList className="grid w-full max-w-lg grid-cols-4 mx-auto">
+            <TabsList className="grid w-full max-w-lg grid-cols-5 mx-auto">
               <TabsTrigger value="products">Products</TabsTrigger>
               <TabsTrigger value="stock">Stock</TabsTrigger>
               <TabsTrigger value="sales">Sales</TabsTrigger>
               <TabsTrigger value="users">Users</TabsTrigger>
+              <TabsTrigger value="audit">Audit</TabsTrigger>
             </TabsList>
 
             <TabsContent value="products">
@@ -164,6 +218,10 @@ export default function AdminPage() {
 
             <TabsContent value="users">
               <UserManagement />
+            </TabsContent>
+
+            <TabsContent value="audit">
+              <RoleChanges />
             </TabsContent>
           </Tabs>
         </div>

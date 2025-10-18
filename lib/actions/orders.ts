@@ -84,6 +84,34 @@ export async function createOrder(items: OrderItem[], checkoutData: CheckoutData
   revalidatePath("/orders")
   revalidatePath("/admin")
 
+  // Create an admin notification so staff know to prepare delivery
+  try {
+    await supabase.from("notifications").insert({
+      user_id: userId,
+      order_id: order.id,
+      type: "new_order",
+      message: `New order ${order.id} placed by ${checkoutData.fullName}`,
+      metadata: {
+        shippingAddress: {
+          houseNumber: checkoutData.houseNumber,
+          street: checkoutData.street,
+          city: checkoutData.city,
+          zipCode: checkoutData.zipCode,
+        },
+        contactInfo: {
+          fullName: checkoutData.fullName,
+          email: checkoutData.email,
+          phone: checkoutData.phone,
+        },
+        total,
+        itemCount: items.length,
+      },
+    });
+  } catch (err) {
+    // Don't fail the checkout if notification fails — just log it
+    console.error("Failed to create admin notification:", err);
+  }
+
   return { success: true, orderId: order.id }
 }
 
